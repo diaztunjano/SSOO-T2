@@ -25,7 +25,7 @@ struct process
     int cycles;
     int wait;
     int waiting_delay;
-    int S_aging_time;
+    int s_aging_time;
 
     // ENUNCIADO -- output
 
@@ -46,11 +46,11 @@ struct process
     // Ciclos de envejecimiento
     int s_aging_counter;
     // Ciclos del wait actual
-    int wait_counter; 
+    int wait_counter;
 
     // Order de procesos
-    Process* next;
-    Process* prev;
+    Process *next;
+    Process *prev;
 };
 
 Process *processInit(char NOMBRE_PROCESO, int PID, int TIEMPO_INICIO, int CYCLES, int WAIT, int WAITING_DELAY, int S);
