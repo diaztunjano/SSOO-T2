@@ -9,5 +9,5 @@ Process *processInit(char NOMBRE_PROCESO, int PID, int TIEMPO_INICIO, int CYCLES
     new_process->wait = WAIT;
     new_process->waiting_delay = WAITING_DELAY;
     new_process->S_aging_time = S;
-    return new_process
+    return new_process;
 }
