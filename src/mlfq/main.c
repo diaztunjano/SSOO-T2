@@ -16,7 +16,11 @@ int main(int argc, char const *argv[])
 	printf("Cantidad de procesos: %d\n", input_file->len);
 	printf("----------------------------\n");
 	printf("Procesos:\n");
+	// Quantum de input
+	int quantum = atoi(argv[2]);
+    printf("Quantum = %d\n", quantum);
 
+	// Info para el proceso
 	int input_info_process[6];
 	char name[10];
 	for (int i = 0; i < input_file->len; ++i)
@@ -36,6 +40,10 @@ int main(int argc, char const *argv[])
 				printf("nombre = %s", name);
 			}
 		}
+
+		// Creo proceso con info anterior
+		Process *new_process = processInit(*name, input_info_process[0], input_info_process[1], input_info_process[2], input_info_process[3], input_info_process[4], input_info_process[5]);
+
 		printf("\n");
 	}
 
