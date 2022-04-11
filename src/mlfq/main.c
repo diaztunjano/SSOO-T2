@@ -1,5 +1,6 @@
 #include <stdio.h>	// FILE, fopen, fclose, etc.
 #include <stdlib.h> // malloc, calloc, free, etc
+#include <string.h> // strcpy
 #include "../process/process.h"
 #include "../queue/queue.h"
 #include "../file_manager/manager.h"
@@ -13,14 +14,27 @@ int main(int argc, char const *argv[])
 	/*Mostramos el archivo de input en consola*/
 	printf("Nombre archivo: %s\n", file_name);
 	printf("Cantidad de procesos: %d\n", input_file->len);
+	printf("----------------------------\n");
 	printf("Procesos:\n");
 
-	
+	int input_info_process[6];
+	char name[10];
 	for (int i = 0; i < input_file->len; ++i)
 	{
 		for (int j = 0; j < 7; ++j)
 		{
-			printf("%s ", input_file->lines[i][j]);
+			printf("(%d)\n", j);
+			if (j) //Saco atributos de ese proceso
+			{
+				input_info_process[j - 1] = atoi(input_file->lines[i][j]);
+				printf("%s ", input_file->lines[i][j]);
+				printf("attrb: %d | ", input_info_process[j - 1]);
+			}
+			else //Saco nombre del proceso
+			{
+				strcpy(name, input_file->lines[i][j]);
+				printf("nombre = %s", name);
+			}
 		}
 		printf("\n");
 	}
