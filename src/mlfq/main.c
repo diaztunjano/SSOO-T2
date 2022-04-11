@@ -19,13 +19,13 @@ int main(int argc, char const *argv[])
 
 	// Quantum de input
 	int quantum = atoi(argv[2]);
-    printf("Quantum = %d\n", quantum);
+	printf("Quantum = %d\n", quantum);
 
 	// Creo cada cola independiente
-	Queue *start_time_queue = queueInit(0,0,quantum); //(type, priority, quantum)
-	Queue *fifo_1_queue = queueInit(0,2,quantum); 
-	Queue *fifo_2_queue = queueInit(0,1,quantum);
-	Queue *sjf_queue = queueInit(1,0,quantum);
+	Queue *start_time_queue = queueInit(0, 0, quantum); //(type, priority, quantum)
+	Queue *fifo_1_queue = queueInit(0, 2, quantum);
+	Queue *fifo_2_queue = queueInit(0, 1, quantum);
+	Queue *sjf_queue = queueInit(1, 0, quantum);
 
 	// Info para el proceso
 	int input_info_process[6];
@@ -52,8 +52,11 @@ int main(int argc, char const *argv[])
 		// Creo proceso con info anterior
 		Process *new_process = processInit(*name, input_info_process[0], input_info_process[1], input_info_process[2], input_info_process[3], input_info_process[4], input_info_process[5]);
 
+		// Lo meto a queue general sorted by time
+		insertSortbyStartTime(start_time_queue, new_process);
 		printf("\n");
 	}
+	showQueue(start_time_queue);
 
 	input_file_destroy(input_file);
 }

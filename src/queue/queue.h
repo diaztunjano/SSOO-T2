@@ -1,4 +1,4 @@
-#pragma once;
+#pragma once
 #include "../process/process.h"
 
 struct queue;
@@ -15,6 +15,7 @@ struct queue
 };
 
 Queue *queueInit(int type, int priority, int quantum);
+void showQueue(Queue *queue);
 
 void addProcessToQueue(Queue *queue, Process *new);
 Process *getProcessFromQueue(Queue *queue, int pid);
@@ -22,6 +23,5 @@ Process *getProcessFromQueue(Queue *queue, int pid);
 void insertSortbyStartTime(Queue *queue, Process *node);
 void insertSortbyCyclesLeft(Queue *queue, Process *node);
 
-void showQueue(Queue *queue);
 void eraseTail(Queue *queue);
 void eraseHead(Queue *queue);
