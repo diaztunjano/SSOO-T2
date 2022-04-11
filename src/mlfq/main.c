@@ -65,6 +65,8 @@ int main(int argc, char const *argv[])
 	// Reviso para cada cola,
 	while (fifo_1_queue->head || fifo_2_queue->head || sjf_queue->head || start_time_queue->head || current_process_in_cpu)
 	{
+		printf("\nCiclo: %d\n", cycle_counter);
+
 		// Agrego a cola FIFO 1 desde cola Start_time que agrupa a todos sorted por start time
 		while (cycle_counter <= start_time_queue->head->start_time)
 		{

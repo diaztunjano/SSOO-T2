@@ -46,6 +46,23 @@ void eraseHead(Queue *queue)
     }
 }
 
+void eraseTail(Queue *queue)
+{
+    if (queue->head == queue->tail)
+    {
+        queue->head = NULL;
+        queue->tail = NULL;
+    }
+    else
+    {
+        Process *prev_tail = queue->tail;
+        Process *new_tail = prev_tail->prev;
+
+        queue->tail = new_tail;
+        queue->tail->next = NULL;
+    }
+}
+
 void addToFIFOQueue(Queue *queue, Process *node_to_add)
 {
     if (queue->length == 0)
@@ -160,4 +177,16 @@ void insertSortbyCyclesLeft(Queue *queue, Process *node_to_add)
         queue->head = node_to_add;
         queue->tail = node_to_add;
     }
+}
+
+Process *getProcessFromQueue(Queue *queue, int pid)
+{
+    for (Process *node_in_queue = queue->head; node_in_queue->next; node_in_queue = node_in_queue->next)
+    {
+        if (node_in_queue->pid == pid)
+        {
+            return node_in_queue;
+        }
+    }
+    return NULL;
 }
