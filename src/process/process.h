@@ -13,14 +13,14 @@ struct process
     int pid;
     char *name[32];
     int priority;
-    enum status
-    {
-        RUNNING,
-        READY,
-        WAITING,
-        FINISHED
-    };
-
+    // enum status
+    // {
+    //     RUNNING,
+    //     READY,
+    //     WAITING,
+    //     FINISHED
+    // };
+    int status; // READY (0), RUNNING (1), , WAITING(2) o FINISHED (3)
     int start_time;
     int cycles;
     int wait;

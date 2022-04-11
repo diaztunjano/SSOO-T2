@@ -58,5 +58,23 @@ int main(int argc, char const *argv[])
 	}
 	showQueue(start_time_queue);
 
+	int cycle_counter = 0;
+	Process *current_process_in_cpu;
+
+	// MAIN LOGIC:
+	// Reviso para cada cola,
+	while (fifo_1_queue->head || fifo_2_queue->head || sjf_queue->head || start_time_queue->head || current_process_in_cpu)
+	{
+		// Agrego a cola FIFO 1 desde cola Start_time que agrupa a todos sorted por start time
+		while (cycle_counter <= start_time_queue->head->start_time)
+		{
+			printf("Entrando PID = %d | startTime = %d \n", start_time_queue->head->pid, start_time_queue->head->start_time);
+			addProcessToQueue(fifo_1_queue, start_time_queue->head);
+			eraseHead(start_time_queue);
+		}
+
+		cycle_counter++;
+	}
+
 	input_file_destroy(input_file);
 }

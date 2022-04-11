@@ -10,7 +10,7 @@ Queue *queueInit(int type, int priority, int quantum)
     return queue;
 }
 
-void addProcess(Queue *queue, Process *node_to_add)
+void addProcessToQueue(Queue *queue, Process *node_to_add)
 {
     printf("(%d)\n", node_to_add->pid);
     //Caso SJF inserto con type = 1
@@ -27,6 +27,23 @@ void addProcess(Queue *queue, Process *node_to_add)
     }
     showQueue(queue);
     queue->length++;
+}
+
+void eraseHead(Queue *queue)
+{
+    printf("ERASING HEAD Queue: %d (0 es FIFO y 1 es SJF)\n", queue->type);
+
+    if (queue->head->next)
+    {
+        Process *new_head = queue->head->next;
+        queue->head = new_head;
+        new_head->prev = NULL;
+    }
+    else
+    {
+        queue->head = NULL;
+        queue->tail = NULL;
+    }
 }
 
 void addToFIFOQueue(Queue *queue, Process *node_to_add)
