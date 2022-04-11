@@ -16,13 +16,21 @@ int main(int argc, char const *argv[])
 	printf("Cantidad de procesos: %d\n", input_file->len);
 	printf("----------------------------\n");
 	printf("Procesos:\n");
+
 	// Quantum de input
 	int quantum = atoi(argv[2]);
     printf("Quantum = %d\n", quantum);
 
+	// Creo cada cola independiente
+	Queue *start_time_queue = queueInit(0,0,quantum); //(type, priority, quantum)
+	Queue *fifo_1_queue = queueInit(0,2,quantum); 
+	Queue *fifo_2_queue = queueInit(0,1,quantum);
+	Queue *sjf_queue = queueInit(1,0,quantum);
+
 	// Info para el proceso
 	int input_info_process[6];
 	char name[10];
+
 	for (int i = 0; i < input_file->len; ++i)
 	{
 		for (int j = 0; j < 7; ++j)
