@@ -9,7 +9,7 @@ struct queue
     int type;     // 0 es FIFO y 1 es SJF
     int quantum;  // será == 0 en Queue SJF
 
-    int len;
+    int length;
     Process *head;
     Process *tail;
 };
