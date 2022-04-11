@@ -31,7 +31,7 @@ struct process
 
     // El numero de veces que el proceso fue elegido para usar alguna CPU
     int cpu_number_choice;
-    // El numero de veces que fue interrumpido. Este equivale al n ´ umero de veces que el ´ scheduler saco al proceso de la CPU
+    // El numero de veces que fue interrumpido. Este equivale al numero de veces que el scheduler saco al proceso de la CPU
     int cpu_number_interruptions;
     // Turnaround time
     int turnaround_time;
