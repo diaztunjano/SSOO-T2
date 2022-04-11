@@ -1,28 +1,27 @@
-// Incluimos standard I/O, standard library
-#include <stdio.h>
-#include <stdlib.h>
-
 #pragma once
+#include "../process/process.h"
 
 struct queue;
 typedef struct queue Queue;
-
 struct queue
 {
-    /** El valor que guarda el pixel */
-    int pid;
-    char name[32];
-    int priority;
-    enum status
-    {
-        RUNNING,
-        READY,
-        WAITING,
-        FINISHED
-    };
+    int priority; //2 para el de más prioridad y 1 para el de menos (FIFO)
+    int type;     // 0 es FIFO y 1 es SJF
+    int quantum;  // será == 0 en Queue SJF
 
-    // Times
-    int remaining_time;
-    int time_a_cpu_burst;
-    int time_b_io_burst;
+    int length;
+    Process *head;
+    Process *tail;
 };
+
+Queue *queueInit(int type, int priority, int quantum);
+void showQueue(Queue *queue);
+
+void addProcessToQueue(Queue *queue, Process *new);
+Process *getProcessFromQueue(Queue *queue, int pid);
+
+void insertSortbyStartTime(Queue *queue, Process *node);
+void insertSortbyCyclesLeft(Queue *queue, Process *node);
+
+void eraseTail(Queue *queue);
+void eraseHead(Queue *queue);
