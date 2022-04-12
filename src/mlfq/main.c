@@ -23,6 +23,7 @@ int main(int argc, char const *argv[])
 
 	// Creo cada cola independiente
 	Queue *start_time_queue = queueInit(0, 0, quantum); //(type, priority, quantum)
+	Queue *finished_queue = queueInit(0, 0, quantum);	// aca guardo todos para despues free
 	Queue *fifo_1_queue = queueInit(0, 2, quantum);
 	Queue *fifo_2_queue = queueInit(0, 1, quantum);
 	Queue *sjf_queue = queueInit(1, 0, quantum);
@@ -150,16 +151,28 @@ int main(int argc, char const *argv[])
 			}
 		}
 
-		// Agrego a cola FIFO 1 desde cola Start_time que agrupa a todos sorted por start time
-		// while (cycle_counter <= start_time_queue->head->start_time)
-		// {
-		// 	printf("Entrando PID = %d | startTime = %d \n", start_time_queue->head->pid, start_time_queue->head->start_time);
-		// 	addProcessToQueue(fifo_1_queue, start_time_queue->head);
-		// 	eraseHead(start_time_queue);
-		// }
+		//////////////////////////////////////////////// Por implementar:
+		/// Revisar Head de start_time_queue  y si su tiempo de inicio es menor a cycle_counter, entra a FIFO_1
+
+		/// Updatear procesos en todas las queues.
+		/// Updateo contadores de status, wait_counter, o bien entrarlo a fifo_1 si es el caso
+		/// podria ser una funcion de la misma queue
+
+		/////////////////////////////
+		/// CASO si es que no hay un current_process_in_CPU
+		if (!current_process_in_cpu)
+		{
+			/* code */
+			// No hay proceso, tengo que buscar cual esta ready para execution
+			////// POR implementar: funcion que retorne ese proceso (Puede ser dentro de queue.c)
+		}
 
 		cycle_counter++;
 	}
+
+	///////////////////// PROCESO DE ESCRITURA DE RESULTADOS:
+
+	///////////////////// LIBERO MEMORIA de Finished processes y listas
 
 	input_file_destroy(input_file);
 }
