@@ -7,6 +7,8 @@ Process *processInit(char NOMBRE_PROCESO, int PID, int TIEMPO_INICIO, int CYCLES
 {
     Process *new_process = calloc(1, sizeof(Process));
     new_process->pid = PID;
+    // https://stackoverflow.com/questions/6008733/expression-must-be-a-modifiable-l-value
+    strcpy(new_process->name, NOMBRE_PROCESO);
     new_process->start_time = TIEMPO_INICIO;
     new_process->cycles = CYCLES;
     new_process->wait = WAIT;
