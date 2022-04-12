@@ -20,7 +20,23 @@ Process *processInit(char NOMBRE_PROCESO, int PID, int TIEMPO_INICIO, int CYCLES
 }
 
 
-void delete_process(Process* new_process)
+void deleteProcess(Process* new_process)
 {
   free(new_process);
+}
+
+// Reviso si llega a envejecimiento al ejecutar
+// o si necesito contar más ciclos despues de llegar a envejec.
+void checkSFlag(Process *check)
+{
+  if (check->s_completed)
+  {
+    check->s_extra_counter++;
+    printf("Contando en S extra counter\n");
+  }
+  if ((check->s_aging_counter) % (check->s_aging_time) == 0)
+  {
+    printf("Envejecimiento cumplido en CPU\n");
+    check->s_completed = 1;
+  }
 }

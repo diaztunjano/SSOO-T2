@@ -190,3 +190,24 @@ Process *getProcessFromQueue(Queue *queue, int pid)
     }
     return NULL;
 }
+
+// Checkeo para colas FIFO 1 y FIFO 2
+int excedesQuantum(Process *process, int quantum)
+{
+    if (process->priority == 0)
+    {
+        // Es por 2 por el caso de queue de mayor prioridad FIFO_1
+        if (process->cpu_actual >= 2 * quantum)
+        {
+            return 1;
+        }
+    }
+    else if (process->priority == 1)
+    {
+        if (process->cpu_actual >= quantum)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}

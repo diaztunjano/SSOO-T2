@@ -59,21 +59,104 @@ int main(int argc, char const *argv[])
 	showQueue(start_time_queue);
 
 	int cycle_counter = 0;
-	Process *current_process_in_cpu;
+	Process *current_process_in_cpu = NULL;
 
 	// MAIN LOGIC:
 	// Reviso para cada cola,
-	while (fifo_1_queue->head || fifo_2_queue->head || sjf_queue->head || start_time_queue->head || current_process_in_cpu)
+	while (fifo_1_queue->head || fifo_2_queue->head || sjf_queue->head || start_time_queue->head || current_process_in_cpu != NULL)
 	{
 		printf("\nCiclo: %d\n", cycle_counter);
 
-		// Agrego a cola FIFO 1 desde cola Start_time que agrupa a todos sorted por start time
-		while (cycle_counter <= start_time_queue->head->start_time)
+		// Reviso proceso actual en CPU
+		if (current_process_in_cpu != NULL)
 		{
-			printf("Entrando PID = %d | startTime = %d \n", start_time_queue->head->pid, start_time_queue->head->start_time);
-			addProcessToQueue(fifo_1_queue, start_time_queue->head);
-			eraseHead(start_time_queue);
+			/* Update de contadores */
+			current_process_in_cpu->cpu_exec_counter++;
+			current_process_in_cpu->s_aging_counter++;
+			current_process_in_cpu->cpu_actual++;
+
+			// Aca ya supero su tiempo de procesamiento
+			// Calculo turnaround time y waiting time
+			//Lo agrego a los procesos terminados (para poder después hacerle free a todos)
+			if (current_process_in_cpu->cpu_exec_counter >= current_process_in_cpu->cycles)
+			{
+				printf("Proceso %d termino \n", current_process_in_cpu->pid);
+			}
+
+			// Proceso cede CPU y ahora espera input. Lo cambio de cola
+			// Le cambio status a waiting, inicio el wait counter y +1 a interrupciones
+			else if (current_process_in_cpu->cpu_exec_counter % current_process_in_cpu->wait == 0)
+			{
+				/* code */
+				printf("Proceso %d cede CPU \n", current_process_in_cpu->pid);
+
+				// Checkeo prioridad para agregarlo a FIFO_1 o FIFO_2
+				if (current_process_in_cpu->priority == 0 || current_process_in_cpu == 1)
+				{
+					/* code */
+					// Agrego a FIFO_1
+					////// Falta crear la funcion tipo addProcess(Queue, process) para usar aca
+				}
+				else
+				{
+					// Esto indica que ya llega a envejecimiento mientras esta ejecutando CPU
+					if (current_process_in_cpu->s_completed)
+					{
+						/* code */
+						// Agrego el proceso a FIFO_1
+						// Actualizo s_completed = 0, s_aging_counter (ciclos envejec.), y reseteo s_extra_counter = 0
+					}
+					else
+					{
+						// Agrego el proceso a FIFO 2
+					}
+				}
+				// NULL pq ahora paso a waiting
+				current_process_in_cpu == NULL;
+			}
+
+			// Cuando un proceso usa todo su quantum en una determinada cola, se reduce su prioridad pasando a la cola siguiente
+			else if (excedesQuantum(current_process_in_cpu, quantum) == 1)
+			{
+				/* code */
+				printf("Proceso %d excede su quantum \n", current_process_in_cpu->pid);
+				current_process_in_cpu->cpu_number_interruptions++;
+
+				// Lo cambio de cola, si == 0, estaba en FIFO_1, lo paso a FIFO_2
+				if (current_process_in_cpu->priority == 0)
+				{
+					/* code */
+					// Cambio a FIFO 2
+					////// Falta crear la funcion tipo addProcess(Queue, process) para usar aca
+				}
+				else
+				{
+					// Caso que cumple envejecimiento durante ejecucion
+					if (current_process_in_cpu->s_completed)
+					{
+						/* code */
+						// Añado a FIFO_1
+						// Reseteo s_completed = 0
+						// Update a s_aging_counter = s_extra_counter
+						// s_extra_counter = 0
+					}
+					else
+					{
+						/* Ultimo caso: Añado a SJF Queue */
+					}
+					// NULL pq lo estoy cambiando de cola
+					current_process_in_cpu = NULL;
+				}
+			}
 		}
+
+		// Agrego a cola FIFO 1 desde cola Start_time que agrupa a todos sorted por start time
+		// while (cycle_counter <= start_time_queue->head->start_time)
+		// {
+		// 	printf("Entrando PID = %d | startTime = %d \n", start_time_queue->head->pid, start_time_queue->head->start_time);
+		// 	addProcessToQueue(fifo_1_queue, start_time_queue->head);
+		// 	eraseHead(start_time_queue);
+		// }
 
 		cycle_counter++;
 	}
