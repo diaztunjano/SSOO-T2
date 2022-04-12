@@ -4,6 +4,14 @@
 
 #pragma once
 
+// https://www.programiz.com/c-programming/c-enumeration
+enum DesignStatus {
+    RUNNING,
+    READY,
+    WAITING,
+    FINISHED
+};
+
 struct process;
 typedef struct process Process;
 
@@ -12,20 +20,14 @@ struct process
     /** Enunciado info minima */
     int pid;
     char *name[32];
-    int priority;
-    // enum status
-    // {
-    //     RUNNING,
-    //     READY,
-    //     WAITING,
-    //     FINISHED
-    // };
-    int status; // READY (0), RUNNING (1), , WAITING(2) o FINISHED (3)
+
+    enum DesignStatus p_status;
     int start_time;
     int cycles;
     int wait;
     int waiting_delay;
     int s_aging_time;
+    int priority;
 
     // ENUNCIADO -- output
 
@@ -53,4 +55,5 @@ struct process
     Process *prev;
 };
 
-Process *processInit(char NOMBRE_PROCESO, int PID, int TIEMPO_INICIO, int CYCLES, int WAIT, int WAITING_DELAY, int S);
+Process *processInit(char NOMBRE_PROCESO, int PID, int TIEMPO_INICIO, int CYCLES, int WAIT, int WAITING_DELAY, int S, enum DesignStatus p_status, int PRIORITY);
+void delete_process(Process* process);
