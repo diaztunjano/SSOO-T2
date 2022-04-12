@@ -50,7 +50,7 @@ int main(int argc, char const *argv[])
 		}
 
 		// Creo proceso con info anterior
-		Process *new_process = processInit(*name, input_info_process[0], input_info_process[1], input_info_process[2], input_info_process[3], input_info_process[4], input_info_process[5]);
+		Process *new_process = processInit(*name, input_info_process[0], input_info_process[1], input_info_process[2], input_info_process[3], input_info_process[4], input_info_process[5], READY, 2); //asp generales: entran a p_i=2 en estado READY
 
 		// Lo meto a queue general sorted by time
 		insertSortbyStartTime(start_time_queue, new_process);
