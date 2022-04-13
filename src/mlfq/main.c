@@ -63,7 +63,7 @@ int main(int argc, char const *argv[])
 	Process *current_process_in_cpu = NULL;
 
 	// MAIN LOGIC:
-	// Reviso para cada cola,
+	// Reviso para cada cola si es que aun tiene procesos
 	while (fifo_1_queue->head || fifo_2_queue->head || sjf_queue->head || start_time_queue->head || current_process_in_cpu != NULL)
 	{
 		printf("\nCiclo: %d\n", cycle_counter);
@@ -82,6 +82,11 @@ int main(int argc, char const *argv[])
 			if (current_process_in_cpu->cpu_exec_counter >= current_process_in_cpu->cycles)
 			{
 				printf("Proceso %d termino \n", current_process_in_cpu->pid);
+				current_process_in_cpu->turnaround_time = (cycle_counter - current_process_in_cpu->start_time - 1);
+				current_process_in_cpu->waiting_time = (current_process_in_cpu->turnaround_time) - (current_process_in_cpu->cpu_exec_counter);
+				current_process_in_cpu->cpu_number_interruptions++;
+				addProcessToQueue(finished_queue, current_process_in_cpu);
+				current_process_in_cpu = NULL;
 			}
 
 			// Proceso cede CPU y ahora espera input. Lo cambio de cola
@@ -90,26 +95,33 @@ int main(int argc, char const *argv[])
 			{
 				/* code */
 				printf("Proceso %d cede CPU \n", current_process_in_cpu->pid);
+				current_process_in_cpu->p_status = WAITING;
+				current_process_in_cpu->wait_counter = 0;
+				current_process_in_cpu->cpu_number_interruptions++;
 
 				// Checkeo prioridad para agregarlo a FIFO_1 o FIFO_2
 				if (current_process_in_cpu->priority == 0 || current_process_in_cpu == 1)
 				{
-					/* code */
 					// Agrego a FIFO_1
-					////// Falta crear la funcion tipo addProcess(Queue, process) para usar aca
+					addProcessToQueue(fifo_1_queue, current_process_in_cpu);
 				}
 				else
 				{
 					// Esto indica que ya llega a envejecimiento mientras esta ejecutando CPU
 					if (current_process_in_cpu->s_completed)
 					{
-						/* code */
 						// Agrego el proceso a FIFO_1
 						// Actualizo s_completed = 0, s_aging_counter (ciclos envejec.), y reseteo s_extra_counter = 0
+						addProcessToQueue(fifo_1_queue, current_process_in_cpu);
+						current_process_in_cpu->s_completed = 0;
+						current_process_in_cpu->s_aging_counter = current_process_in_cpu->s_extra_counter;
+						current_process_in_cpu->s_extra_counter = 0;
+						printf("[WAIT Salida]S Completed durante CPU\n");
 					}
 					else
 					{
 						// Agrego el proceso a FIFO 2
+						addProcessToQueue(fifo_2_queue, current_process_in_cpu);
 					}
 				}
 				// NULL pq ahora paso a waiting
@@ -126,24 +138,30 @@ int main(int argc, char const *argv[])
 				// Lo cambio de cola, si == 0, estaba en FIFO_1, lo paso a FIFO_2
 				if (current_process_in_cpu->priority == 0)
 				{
-					/* code */
 					// Cambio a FIFO 2
 					////// Falta crear la funcion tipo addProcess(Queue, process) para usar aca
+					addProcessToQueue(fifo_2_queue, current_process_in_cpu);
 				}
 				else
 				{
 					// Caso que cumple envejecimiento durante ejecucion
 					if (current_process_in_cpu->s_completed)
 					{
-						/* code */
+						
 						// Añado a FIFO_1
 						// Reseteo s_completed = 0
 						// Update a s_aging_counter = s_extra_counter
 						// s_extra_counter = 0
+						addProcessToQueue(fifo_1_queue, current_process_in_cpu);
+						current_process_in_cpu->s_completed = 0;
+						current_process_in_cpu->s_aging_counter = current_process_in_cpu->s_extra_counter;
+						current_process_in_cpu->s_extra_counter = 0;
+						printf("[QUANTUM Salida] S Completed durante CPU\n");
 					}
 					else
 					{
 						/* Ultimo caso: Añado a SJF Queue */
+						addProcessToQueue(sjf_queue, current_process_in_cpu);
 					}
 					// NULL pq lo estoy cambiando de cola
 					current_process_in_cpu = NULL;
@@ -157,6 +175,10 @@ int main(int argc, char const *argv[])
 		/// Updatear procesos en todas las queues.
 		/// Updateo contadores de status, wait_counter, o bien entrarlo a fifo_1 si es el caso
 		/// podria ser una funcion de la misma queue
+
+		
+
+
 
 		/////////////////////////////
 		/// CASO si es que no hay un current_process_in_CPU
