@@ -147,7 +147,7 @@ int main(int argc, char const *argv[])
 					// Caso que cumple envejecimiento durante ejecucion
 					if (current_process_in_cpu->s_completed)
 					{
-						
+
 						// Añado a FIFO_1
 						// Reseteo s_completed = 0
 						// Update a s_aging_counter = s_extra_counter
@@ -177,24 +177,46 @@ int main(int argc, char const *argv[])
 		/// podria ser una funcion de la misma queue
 
 		while (start_time_queue->head && start_time_queue->head->start_time <= cycle_counter)
-        {
-            Process *enteringProcess = start_time_queue->head;
-            eraseHead(start_time_queue);
-            addProcess(fifo_1_queue, enteringProcess);
-        }
+		{
+			Process *enteringProcess = start_time_queue->head;
+			eraseHead(start_time_queue);
+			addProcess(fifo_1_queue, enteringProcess);
+		}
 
-        updateProcesses(fifo_1_queue, fifo_1_queue);
-        updateProcesses(fifo_2_queue, fifo_1_queue);
-        updateProcesses(sjf_queue, fifo_1_queue);
-
+		updateProcesses(fifo_1_queue, fifo_1_queue);
+		updateProcesses(fifo_2_queue, fifo_1_queue);
+		updateProcesses(sjf_queue, fifo_1_queue);
 
 		/////////////////////////////
 		/// CASO si es que no hay un current_process_in_CPU
 		if (!current_process_in_cpu)
 		{
-			/* code */
 			// No hay proceso, tengo que buscar cual esta ready para execution
 			////// POR implementar: funcion que retorne ese proceso (Puede ser dentro de queue.c)
+			printf("No hay proceso\n");
+			current_process_in_cpu = processReadyForExecution(fifo_1_queue);
+			if (current_process_in_cpu == NULL)
+			{
+				current_process_in_cpu = processReadyForExecution(fifo_2_queue);
+			}
+			if (current_process_in_cpu == NULL)
+			{
+				current_process_in_cpu = processReadyForExecution(sjf_queue);
+			}
+			if (current_process_in_cpu == NULL)
+			{
+				printf("No hay proceso para ejecutar");
+			}
+			if (current_process_in_cpu != NULL)
+			{
+				if (!current_process_in_cpu->cpu_number_choice)
+				{
+					current_process_in_cpu->response_time = (cycle_counter + 1) - (current_process_in_cpu->start_time);
+				}
+				current_process_in_cpu->cpu_number_choice++;
+				current_process_in_cpu->cpu_actual = 0;
+				printf("Entra proceso desde lista %d\n", current_process_in_cpu->priority);
+			}
 		}
 
 		cycle_counter++;

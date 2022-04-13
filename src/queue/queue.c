@@ -258,10 +258,25 @@ void updateProcesses(Queue *queue, Queue *fifo1)
         if (queue->priority != 0 && (process->s_aging_counter) % (process->s_aging_time) == 0)
         {
             Process *newPriority = process;
-            removeProcess(queue, process);
+            removeProcessFromQueue(queue, process);
             addProcessToQueue(fifo1, newPriority);
             process->s_aging_counter = 0;
             printf("[Salida a FIFO 1] Por envejecimiento\n");
         }
     }
+}
+
+Process *processReadyForExecution(Queue *queue)
+{
+
+    for (Process *process = queue->head; process; process = process->next)
+    {
+        if (process->p_status == READY)
+        {
+            process->priority = queue->priority; //al momento de ejecutarse en CPU, guardo de dde viene
+            removeProcessFromQueue(queue, process);
+            return process;
+        }
+    }
+    return NULL;
 }
