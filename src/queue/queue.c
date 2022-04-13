@@ -13,20 +13,21 @@ Queue *queueInit(int type, int priority, int quantum)
 void addProcessToQueue(Queue *queue, Process *node_to_add)
 {
     printf("(%d)\n", node_to_add->pid);
+    node_to_add->next = NULL;
+    node_to_add->prev = NULL;
+    queue->length++;
     //Caso SJF inserto con type = 1
     if (queue->type == 1)
     {
-        printf("CASO SJF\n");
+        printf("[ADD PROCESS] - CASO SJF\n");
         insertSortbyCyclesLeft(queue, node_to_add);
     }
     //Caso FIFO agrego al final
     else
     {
-        printf("CASO FIFO\n");
+        printf("[ADD PROCESS] - CASO FIFO\n");
         addToFIFOQueue(queue, node_to_add);
     }
-    showQueue(queue);
-    queue->length++;
 }
 
 void removeProcessFromQueue(Queue *queue, Process *process)
@@ -73,6 +74,7 @@ void eraseHead(Queue *queue)
         queue->head = NULL;
         queue->tail = NULL;
     }
+    queue->length--;
 }
 
 void eraseTail(Queue *queue)
@@ -94,18 +96,15 @@ void eraseTail(Queue *queue)
 
 void addToFIFOQueue(Queue *queue, Process *node_to_add)
 {
-    if (queue->length == 0)
+    if (!queue->head)
     {
         queue->head = node_to_add;
-        printf("HEAD con PID: %d\n", node_to_add->pid);
     }
     else
     {
-        printf("TAIL con PID: %d\n", node_to_add->pid);
         queue->tail->next = node_to_add;
         node_to_add->prev = queue->tail;
     }
-    //printf("agregado el estrecho con id = %i al padre %i\n", person -> id, person ->parent ->id);
     queue->tail = node_to_add;
 }
 
@@ -157,18 +156,17 @@ void insertSortbyStartTime(Queue *queue, Process *node)
 
 void showQueue(Queue *queue)
 {
-    printf("Imprimiendo queue Largo = %d Headpid = %d \n", queue->length, queue->head->pid);
-
-    for (Process *node_in_queue = queue->head; node_in_queue; node_in_queue = node_in_queue->next)
+    printf("Imprimiendo Lista \n");
+    for (Process *process = queue->head; process; process = process->next)
     {
-        printf("PID = %d | Start Time = %d \n", node_in_queue->pid, node_in_queue->start_time);
+        printf("pid = %d | startTime = %d | cycles = %d | cpuCount = %d\n", process->pid, process->start_time, process->cycles, process->cpu_exec_counter);
     }
 }
 
 // Similar ejecucion al insertSortbyStartTime
 void insertSortbyCyclesLeft(Queue *queue, Process *node_to_add)
 {
-    printf("Entering CyclesLeft %d\n", node_to_add->cycles_left_counter);
+    printf("[CyclesLeft] - Counter: %d\n", node_to_add->cycles_left_counter);
     int node_to_compare = (node_to_add->cycles) - (node_to_add->cpu_exec_counter);
     queue->length++;
     if (queue->head)
@@ -180,6 +178,7 @@ void insertSortbyCyclesLeft(Queue *queue, Process *node_to_add)
                 //Mejor que Head
                 if (node_in_queue->pid == queue->head->pid)
                 {
+                    printf("New head in queue\n");
                     queue->head = node_to_add;
                     node_in_queue->prev = node_to_add;
                     node_to_add->next = node_in_queue;
@@ -187,6 +186,8 @@ void insertSortbyCyclesLeft(Queue *queue, Process *node_to_add)
                 }
                 else
                 {
+                    printf("Behind head\n");
+
                     node_to_add->next = node_in_queue;
                     Process *prev_original_node = node_in_queue->prev;
                     prev_original_node->next = node_to_add;
@@ -196,6 +197,7 @@ void insertSortbyCyclesLeft(Queue *queue, Process *node_to_add)
                 }
             }
         }
+        printf("Ultimo en queue\n");
         Process *old_tail_node = queue->tail;
         queue->tail = node_to_add;
         old_tail_node->next = node_to_add;
@@ -203,6 +205,7 @@ void insertSortbyCyclesLeft(Queue *queue, Process *node_to_add)
     }
     else
     {
+        printf("1st Node in queue\n");
         queue->head = node_to_add;
         queue->tail = node_to_add;
     }
@@ -246,13 +249,13 @@ void updateProcesses(Queue *queue, Queue *fifo1)
     for (Process *process = queue->head; process; process = process->next)
     {
         process->s_aging_counter++;
-        if (process->p_status == WAITING)
+        if (process->status == 2)
         {
             process->wait_counter++;
         }
         if (process->wait_counter > process->waiting_delay)
         {
-            process->p_status = READY;
+            process->status = 0;
             process->wait_counter = 0;
         }
         if (queue->priority != 0 && (process->s_aging_counter) % (process->s_aging_time) == 0)
@@ -271,9 +274,9 @@ Process *processReadyForExecution(Queue *queue)
 
     for (Process *process = queue->head; process; process = process->next)
     {
-        if (process->p_status == READY)
+        if (process->status == 0)
         {
-            process->priority = queue->priority; //al momento de ejecutarse en CPU, guardo de dde viene
+            process->priority = queue->priority; //al momento de ejecutarse en CPU, guardo de donde viene
             removeProcessFromQueue(queue, process);
             return process;
         }

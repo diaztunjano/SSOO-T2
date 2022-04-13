@@ -9,6 +9,7 @@ int main(int argc, char const *argv[])
 {
 	/*Lectura del input*/
 	char *file_name = (char *)argv[1];
+	char *output_name = (char *)argv[2];
 	InputFile *input_file = read_file(file_name);
 
 	/*Mostramos el archivo de input en consola*/
@@ -18,19 +19,19 @@ int main(int argc, char const *argv[])
 	printf("Procesos:\n");
 
 	// Quantum de input
-	int quantum = atoi(argv[2]);
+	int quantum = atoi(argv[3]);
 	printf("Quantum = %d\n", quantum);
 
 	// Creo cada cola independiente
-	Queue *start_time_queue = queueInit(0, 0, quantum); //(type, priority, quantum)
-	Queue *finished_queue = queueInit(0, 0, quantum);	// aca guardo todos para despues free
-	Queue *fifo_1_queue = queueInit(0, 2, quantum);
+	Queue *start_time_queue = queueInit(0, 0, 0); //(type, priority, quantum)
+	Queue *finished_queue = queueInit(0, 0, 0);	  // aca guardo todos para despues free
+	Queue *fifo_1_queue = queueInit(0, 0, quantum * 2);
 	Queue *fifo_2_queue = queueInit(0, 1, quantum);
-	Queue *sjf_queue = queueInit(1, 0, quantum);
+	Queue *sjf_queue = queueInit(1, 2, 0);
 
 	// Info para el proceso
 	int input_info_process[6];
-	char name[10];
+	char name[10] = "";
 
 	for (int i = 0; i < input_file->len; ++i)
 	{
@@ -41,23 +42,21 @@ int main(int argc, char const *argv[])
 			{
 				input_info_process[j - 1] = atoi(input_file->lines[i][j]);
 				printf("%s ", input_file->lines[i][j]);
-				printf("attrb: %d | ", input_info_process[j - 1]);
+				printf("info_input: %d | ", input_info_process[j - 1]);
 			}
 			else //Saco nombre del proceso
 			{
 				strcpy(name, input_file->lines[i][j]);
-				printf("nombre = %s", name);
+				printf("NAME = %s\n", name);
 			}
 		}
 
 		// Creo proceso con info anterior
-		Process *new_process = processInit(*name, input_info_process[0], input_info_process[1], input_info_process[2], input_info_process[3], input_info_process[4], input_info_process[5], READY, 2); //asp generales: entran a p_i=2 en estado READY
+		Process *new_process = processInit(name, input_info_process[0], input_info_process[1], input_info_process[2], input_info_process[3], input_info_process[4], input_info_process[5]);
 
 		// Lo meto a queue general sorted by time
 		insertSortbyStartTime(start_time_queue, new_process);
-		printf("\n");
 	}
-	showQueue(start_time_queue);
 
 	int cycle_counter = 0;
 	Process *current_process_in_cpu = NULL;
@@ -66,7 +65,8 @@ int main(int argc, char const *argv[])
 	// Reviso para cada cola si es que aun tiene procesos
 	while (fifo_1_queue->head || fifo_2_queue->head || sjf_queue->head || start_time_queue->head || current_process_in_cpu != NULL)
 	{
-		printf("\nCiclo: %d\n", cycle_counter);
+		printf("---------------------------\n");
+		printf("Ciclo: %d\n", cycle_counter);
 
 		// Reviso proceso actual en CPU
 		if (current_process_in_cpu != NULL)
@@ -75,14 +75,14 @@ int main(int argc, char const *argv[])
 			current_process_in_cpu->cpu_exec_counter++;
 			current_process_in_cpu->s_aging_counter++;
 			current_process_in_cpu->cpu_actual++;
-
+			checkSStatus(current_process_in_cpu);
 			// Aca ya supero su tiempo de procesamiento
 			// Calculo turnaround time y waiting time
 			//Lo agrego a los procesos terminados (para poder después hacerle free a todos)
 			if (current_process_in_cpu->cpu_exec_counter >= current_process_in_cpu->cycles)
 			{
 				printf("Proceso %d termino \n", current_process_in_cpu->pid);
-				current_process_in_cpu->turnaround_time = (cycle_counter - current_process_in_cpu->start_time - 1);
+				current_process_in_cpu->turnaround_time = (cycle_counter - 1 - current_process_in_cpu->start_time);
 				current_process_in_cpu->waiting_time = (current_process_in_cpu->turnaround_time) - (current_process_in_cpu->cpu_exec_counter);
 				current_process_in_cpu->cpu_number_interruptions++;
 				addProcessToQueue(finished_queue, current_process_in_cpu);
@@ -93,14 +93,13 @@ int main(int argc, char const *argv[])
 			// Le cambio status a waiting, inicio el wait counter y +1 a interrupciones
 			else if (current_process_in_cpu->cpu_exec_counter % current_process_in_cpu->wait == 0)
 			{
-				/* code */
 				printf("Proceso %d cede CPU \n", current_process_in_cpu->pid);
-				current_process_in_cpu->p_status = WAITING;
+				current_process_in_cpu->status = 2;
 				current_process_in_cpu->wait_counter = 0;
 				current_process_in_cpu->cpu_number_interruptions++;
 
 				// Checkeo prioridad para agregarlo a FIFO_1 o FIFO_2
-				if (current_process_in_cpu->priority == 0 || current_process_in_cpu == 1)
+				if (current_process_in_cpu->priority == 0 || current_process_in_cpu->priority == 1)
 				{
 					// Agrego a FIFO_1
 					addProcessToQueue(fifo_1_queue, current_process_in_cpu);
@@ -116,7 +115,7 @@ int main(int argc, char const *argv[])
 						current_process_in_cpu->s_completed = 0;
 						current_process_in_cpu->s_aging_counter = current_process_in_cpu->s_extra_counter;
 						current_process_in_cpu->s_extra_counter = 0;
-						printf("[WAIT Salida]S Completed durante CPU\n");
+						printf("[WAIT Salida] S Completed durante CPU\n");
 					}
 					else
 					{
@@ -125,10 +124,11 @@ int main(int argc, char const *argv[])
 					}
 				}
 				// NULL pq ahora paso a waiting
-				current_process_in_cpu == NULL;
+				current_process_in_cpu = NULL;
 			}
 
 			// Cuando un proceso usa todo su quantum en una determinada cola, se reduce su prioridad pasando a la cola siguiente
+
 			else if (excedesQuantum(current_process_in_cpu, quantum) == 1)
 			{
 				/* code */
@@ -164,8 +164,8 @@ int main(int argc, char const *argv[])
 						addProcessToQueue(sjf_queue, current_process_in_cpu);
 					}
 					// NULL pq lo estoy cambiando de cola
-					current_process_in_cpu = NULL;
 				}
+				current_process_in_cpu = NULL;
 			}
 		}
 
@@ -180,7 +180,7 @@ int main(int argc, char const *argv[])
 		{
 			Process *enteringProcess = start_time_queue->head;
 			eraseHead(start_time_queue);
-			addProcess(fifo_1_queue, enteringProcess);
+			addProcessToQueue(fifo_1_queue, enteringProcess);
 		}
 
 		updateProcesses(fifo_1_queue, fifo_1_queue);
@@ -193,7 +193,7 @@ int main(int argc, char const *argv[])
 		{
 			// No hay proceso, tengo que buscar cual esta ready para execution
 			////// POR implementar: funcion que retorne ese proceso (Puede ser dentro de queue.c)
-			printf("No hay proceso\n");
+			printf("No hay proceso actual en CPU\n");
 			current_process_in_cpu = processReadyForExecution(fifo_1_queue);
 			if (current_process_in_cpu == NULL)
 			{
@@ -205,7 +205,7 @@ int main(int argc, char const *argv[])
 			}
 			if (current_process_in_cpu == NULL)
 			{
-				printf("No hay proceso para ejecutar");
+				printf("No hay proceso para ejecutar\n");
 			}
 			if (current_process_in_cpu != NULL)
 			{
@@ -224,7 +224,50 @@ int main(int argc, char const *argv[])
 
 	///////////////////// PROCESO DE ESCRITURA DE RESULTADOS:
 
+	FILE *fptr;
+
+	// opening file in writing mode
+	fptr = fopen(output_name, "w");
+
+	// exiting program
+	if (fptr == NULL)
+	{
+		printf("Error!");
+		exit(1);
+	}
+	int counter = 0;
+	printf("WRITING OUTPUT FILE\n");
+	for (Process *process = finished_queue->head; process; process = process->next)
+	{
+		printf("(%d)\n", counter);
+		counter++;
+		fprintf(fptr, "%s,%d,%d,%d,%d,%d\n", process->name, process->cpu_number_choice,
+				process->cpu_number_interruptions, process->turnaround_time, process->response_time, process->waiting_time);
+		printf("%s, %d, %d, %d , %d, %d\n", process->name, process->cpu_number_choice,
+			   process->cpu_number_interruptions, process->turnaround_time, process->response_time, process->waiting_time);
+	}
+	fclose(fptr);
+
 	///////////////////// LIBERO MEMORIA de Finished processes y listas
+
+	if (finished_queue->head)
+	{
+		Process *curr = finished_queue->head->next;
+		Process *prev = finished_queue->head;
+
+		while (curr)
+		{
+			deleteProcess(prev);
+			prev = curr;
+			curr = curr->next;
+		}
+		deleteProcess(prev);
+	}
+	free(finished_queue);
+	free(fifo_1_queue);
+	free(fifo_2_queue);
+	free(start_time_queue);
+	free(sjf_queue);
 
 	input_file_destroy(input_file);
 }

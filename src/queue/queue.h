@@ -30,3 +30,4 @@ void addToFIFOQueue(Queue *queue, Process *node_to_add);
 void eraseTail(Queue *queue);
 void eraseHead(Queue *queue);
 
+int excedesQuantum(Process *process, int quantum);
