@@ -176,8 +176,16 @@ int main(int argc, char const *argv[])
 		/// Updateo contadores de status, wait_counter, o bien entrarlo a fifo_1 si es el caso
 		/// podria ser una funcion de la misma queue
 
-		
+		while (start_time_queue->head && start_time_queue->head->start_time <= cycle_counter)
+        {
+            Process *enteringProcess = start_time_queue->head;
+            eraseHead(start_time_queue);
+            addProcess(fifo_1_queue, enteringProcess);
+        }
 
+        updateProcesses(fifo_1_queue, fifo_1_queue);
+        updateProcesses(fifo_2_queue, fifo_1_queue);
+        updateProcesses(sjf_queue, fifo_1_queue);
 
 
 		/////////////////////////////

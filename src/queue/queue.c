@@ -29,6 +29,35 @@ void addProcessToQueue(Queue *queue, Process *node_to_add)
     queue->length++;
 }
 
+void removeProcessFromQueue(Queue *queue, Process *process)
+{
+    if (process->prev && process->next)
+    {
+        process->next->prev = process->prev;
+        process->prev->next = process->next;
+    }
+    else if (process->next)
+    {
+        // es head
+        queue->head = process->next;
+        queue->head->prev = NULL;
+    }
+    else if (process->prev)
+    {
+        // es la cola
+        queue->tail = process->prev;
+        queue->tail->next = NULL;
+    }
+    else
+    {
+        // es el unico proceso
+        queue->head = NULL;
+        queue->tail = NULL;
+    }
+    process->next = NULL;
+    process->prev = NULL;
+}
+
 void eraseHead(Queue *queue)
 {
     printf("ERASING HEAD Queue: %d (0 es FIFO y 1 es SJF)\n", queue->type);
@@ -210,4 +239,29 @@ int excedesQuantum(Process *process, int quantum)
         }
     }
     return 0;
+}
+
+void updateProcesses(Queue *queue, Queue *fifo1)
+{
+    for (Process *process = queue->head; process; process = process->next)
+    {
+        process->s_aging_counter++;
+        if (process->p_status == WAITING)
+        {
+            process->wait_counter++;
+        }
+        if (process->wait_counter > process->waiting_delay)
+        {
+            process->p_status = READY;
+            process->wait_counter = 0;
+        }
+        if (queue->priority != 0 && (process->s_aging_counter) % (process->s_aging_time) == 0)
+        {
+            Process *newPriority = process;
+            removeProcess(queue, process);
+            addProcessToQueue(fifo1, newPriority);
+            process->s_aging_counter = 0;
+            printf("[Salida a FIFO 1] Por envejecimiento\n");
+        }
+    }
 }

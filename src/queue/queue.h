@@ -18,7 +18,9 @@ Queue *queueInit(int type, int priority, int quantum);
 void showQueue(Queue *queue);
 
 void addProcessToQueue(Queue *queue, Process *new);
+void removeProcessFromQueue(Queue *queue, Process *process);
 Process *getProcessFromQueue(Queue *queue, int pid);
+void updateProcesses(Queue *queue, Queue *fifo1);
 
 void insertSortbyStartTime(Queue *queue, Process *node);
 void insertSortbyCyclesLeft(Queue *queue, Process *node);
