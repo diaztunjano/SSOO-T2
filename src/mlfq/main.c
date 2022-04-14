@@ -82,9 +82,8 @@ int main(int argc, char const *argv[])
 			if (current_process_in_cpu->cpu_exec_counter >= current_process_in_cpu->cycles)
 			{
 				printf("Proceso %d termino \n", current_process_in_cpu->pid);
-				current_process_in_cpu->turnaround_time = (cycle_counter - 1 - current_process_in_cpu->start_time);
+				current_process_in_cpu->turnaround_time = (cycle_counter - current_process_in_cpu->start_time);
 				current_process_in_cpu->waiting_time = (current_process_in_cpu->turnaround_time) - (current_process_in_cpu->cpu_exec_counter);
-				current_process_in_cpu->cpu_number_interruptions++;
 				addProcessToQueue(finished_queue, current_process_in_cpu);
 				current_process_in_cpu = NULL;
 			}
@@ -96,7 +95,6 @@ int main(int argc, char const *argv[])
 				printf("Proceso %d cede CPU \n", current_process_in_cpu->pid);
 				current_process_in_cpu->status = 2;
 				current_process_in_cpu->wait_counter = 0;
-				current_process_in_cpu->cpu_number_interruptions++;
 
 				// Checkeo prioridad para agregarlo a FIFO_1 o FIFO_2
 				if (current_process_in_cpu->priority == 0 || current_process_in_cpu->priority == 1)
@@ -211,7 +209,7 @@ int main(int argc, char const *argv[])
 			{
 				if (!current_process_in_cpu->cpu_number_choice)
 				{
-					current_process_in_cpu->response_time = (cycle_counter + 1) - (current_process_in_cpu->start_time);
+					current_process_in_cpu->response_time = (cycle_counter) - (current_process_in_cpu->start_time);
 				}
 				current_process_in_cpu->cpu_number_choice++;
 				current_process_in_cpu->cpu_actual = 0;

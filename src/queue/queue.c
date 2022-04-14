@@ -234,9 +234,9 @@ int excedesQuantum(Process *process, int quantum)
             return 1;
         }
     }
-    else if (process->priority == 1)
+    else if (process->priority != 0)
     {
-        if (process->cpu_actual >= quantum)
+        if (quantum == 0)
         {
             return 1;
         }
